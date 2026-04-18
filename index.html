@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kasir Botela</title>
+<title>Kasir Botela Fast</title>
 
 <style>
 body {
@@ -22,35 +22,22 @@ body {
   border-radius: 15px;
 }
 
-h1 {
-  margin-bottom: 10px;
-}
+h1 { margin-bottom: 10px; }
 
-select, input, button {
+.menu-btn button {
   width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 12px;
   border: none;
   font-size: 16px;
-}
-
-button {
   font-weight: bold;
   cursor: pointer;
+  margin-top: 10px;
 }
 
-.btn-tambah {
-  background: #22c55e;
-}
-
-.btn-reset {
-  background: #ef4444;
-}
-
-.btn-bayar {
-  background: #3b82f6;
-}
+.americano { background: #22c55e; }
+.kopisusu { background: #3b82f6; }
+.matcha { background: #a855f7; }
 
 .list {
   text-align: left;
@@ -61,18 +48,41 @@ button {
   background: #334155;
   padding: 10px;
   border-radius: 10px;
-  margin-top: 8px;
+  margin-top: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hapus-btn {
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .total {
   font-size: 22px;
-  margin-top: 15px;
+  margin-top: 10px;
   color: #38bdf8;
 }
 
+input, .btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: none;
+}
+
+.btn-bayar { background: #f59e0b; }
+.btn-reset { background: #ef4444; }
+.btn-simpan { background: #10b981; }
+
 .kembalian {
-  font-size: 18px;
-  margin-top: 10px;
+  margin-top: 5px;
   color: #facc15;
 }
 </style>
@@ -81,17 +91,14 @@ button {
 <body>
 
 <div class="container">
-  <h1>Kasir Botela</h1>
+  <h1>Kasir Botela ⚡</h1>
 
-  <select id="menu">
-    <option value="12000">Americano - 12.000</option>
-    <option value="15000">Kopi Susu - 15.000</option>
-    <option value="17000">Matcha - 17.000</option>
-  </select>
-
-  <input type="number" id="jumlah" placeholder="Jumlah">
-
-  <button class="btn-tambah" onclick="tambahItem()">+ Tambah</button>
+  <!-- tombol cepat -->
+  <div class="menu-btn">
+    <button class="americano" onclick="tambah('Americano',12000)">+ Americano (12k)</button>
+    <button class="kopisusu" onclick="tambah('Kopi Susu',15000)">+ Kopi Susu (15k)</button>
+    <button class="matcha" onclick="tambah('Matcha',15000)">+ Matcha (15k)</button>
+  </div>
 
   <div class="list" id="list"></div>
 
@@ -99,42 +106,48 @@ button {
 
   <input type="number" id="bayar" placeholder="Uang Pembeli">
 
-  <button class="btn-bayar" onclick="hitungKembalian()">Hitung Kembalian</button>
+  <button class="btn btn-bayar" onclick="hitung()">Hitung Kembalian</button>
 
   <div class="kembalian" id="kembalian"></div>
 
-  <button class="btn-reset" onclick="resetKasir()">Reset</button>
+  <button class="btn btn-simpan" onclick="simpan()">Simpan Transaksi</button>
+  <button class="btn btn-reset" onclick="resetKasir()">Reset Semua</button>
 </div>
 
 <script>
 let total = 0;
+let transaksi = JSON.parse(localStorage.getItem("trx")) || [];
+let items = [];
 
-function tambahItem() {
-  let menu = document.getElementById("menu");
-  let jumlah = document.getElementById("jumlah").value;
+function tambah(nama, harga) {
+  items.push({ nama, harga });
+  total += harga;
+  tampilkanItem();
+}
 
-  if (jumlah === "" || jumlah <= 0) {
-    alert("Masukkan jumlah!");
-    return;
-  }
-
-  let nama = menu.options[menu.selectedIndex].text;
-  let harga = menu.value;
-  let subtotal = harga * jumlah;
-
-  total += subtotal;
-
+function tampilkanItem() {
   let list = document.getElementById("list");
+  list.innerHTML = "";
 
-  let item = document.createElement("div");
-  item.className = "item";
-  item.innerText = `${nama} x${jumlah} = Rp ${subtotal.toLocaleString("id-ID")}`;
+  items.forEach((item, index) => {
+    let div = document.createElement("div");
+    div.className = "item";
 
-  list.appendChild(item);
+    div.innerHTML = `
+      <span>${item.nama} = Rp ${item.harga.toLocaleString("id-ID")}</span>
+      <button class="hapus-btn" onclick="hapusItem(${index})">❌</button>
+    `;
+
+    list.appendChild(div);
+  });
 
   updateTotal();
+}
 
-  document.getElementById("jumlah").value = "";
+function hapusItem(index) {
+  total -= items[index].harga;
+  items.splice(index, 1);
+  tampilkanItem();
 }
 
 function updateTotal() {
@@ -142,10 +155,10 @@ function updateTotal() {
     "Total: Rp " + total.toLocaleString("id-ID");
 }
 
-function hitungKembalian() {
+function hitung() {
   let bayar = document.getElementById("bayar").value;
 
-  if (bayar === "" || bayar < total) {
+  if (bayar < total || bayar == "") {
     alert("Uang kurang!");
     return;
   }
@@ -156,8 +169,25 @@ function hitungKembalian() {
     "Kembalian: Rp " + kembali.toLocaleString("id-ID");
 }
 
+function simpan() {
+  if (total === 0) {
+    alert("Belum ada transaksi!");
+    return;
+  }
+
+  transaksi.push({
+    waktu: new Date().toLocaleTimeString(),
+    total: total
+  });
+
+  localStorage.setItem("trx", JSON.stringify(transaksi));
+
+  resetKasir();
+}
+
 function resetKasir() {
   total = 0;
+  items = [];
   document.getElementById("list").innerHTML = "";
   document.getElementById("total").innerText = "Total: Rp 0";
   document.getElementById("kembalian").innerText = "";
