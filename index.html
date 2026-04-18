@@ -2,10 +2,17 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kasir Botela Fast</title>
+
+<!-- ✅ ANTI ZOOM -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Kasir Botela</title>
 
 <style>
+html, body {
+  touch-action: manipulation;
+}
+
 body {
   font-family: Arial;
   background: #0f172a;
@@ -93,7 +100,6 @@ input, .btn {
 <div class="container">
   <h1>Kasir Botela ⚡</h1>
 
-  <!-- tombol cepat -->
   <div class="menu-btn">
     <button class="americano" onclick="tambah('Americano',12000)">+ Americano (12k)</button>
     <button class="kopisusu" onclick="tambah('Kopi Susu',15000)">+ Kopi Susu (15k)</button>
@@ -193,6 +199,16 @@ function resetKasir() {
   document.getElementById("kembalian").innerText = "";
   document.getElementById("bayar").value = "";
 }
+
+/* ✅ ANTI DOUBLE TAP ZOOM */
+let lastTouch = 0;
+document.addEventListener("touchend", function (event) {
+  let now = new Date().getTime();
+  if (now - lastTouch <= 300) {
+    event.preventDefault();
+  }
+  lastTouch = now;
+}, false);
 </script>
 
 </body>
